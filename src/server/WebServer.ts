@@ -16,8 +16,26 @@ export class WebServer {
     public server: http.Server | undefined;
 
     public constructor(private readonly port: number) {
+        passport.serializeUser(function (user, done) {
+            done(null, user);
+        });
+
+        passport.deserializeUser(function (obj: any, done) {
+            done(null, obj);
+        });
+
+        passport.use(new OAuth2Strategy({
+            state: true,
+            authorizationURL: 'http://localhost:8080/authorize',
+            tokenURL: 'http://localhost:8080/token',
+            clientID: "de783c8d0787e52f2f4b",
+            clientSecret: "barish",
+            callbackURL: "http://localhost:8888/callback",
+        }, (accessToken: any, refreshToken: any, profile: any, cb: any) => {
+            return cb(undefined, { email: "adhami@mit.edu", name: "Khaleel Al-Adhami" });
+        }));
+
         this.app = express();
-        this.app.use(cors());
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
         this.app.use(session({
@@ -26,43 +44,18 @@ export class WebServer {
             saveUninitialized: true,
             cookie: { maxAge: 60 * 60 * 1000 } // 1 hour
         }));
-          
         this.app.use(passport.initialize());
         this.app.use(passport.session());
-
-        passport.serializeUser(function(user, done) {
-            done(null, user);
-        });
-
-        passport.deserializeUser((user: any, done) => {
-            done(null, user);
-        });
-
-        const tokenToProfile = (accessToken: any, refreshToken: any, profile: any, cb: any) => {
-            console.log(accessToken);
-            return cb(undefined, {email: "adhami@mit.edu", name: "Khaleel Al-Adhami"});
-        };
-
-        passport.use(new OAuth2Strategy({
-            state: true,
-            authorizationURL: 'https://github.com/login/oauth/authorize',
-            tokenURL: 'https://github.com/login/oauth/access_token',
-            clientID: "1",
-            clientSecret: "barish",
-            callbackURL: "http://localhost:8888/callback",
-            passReqToCallback: true
-        }, tokenToProfile));
 
         this.app.get('/login', passport.authenticate('oauth2', {
             session: true,
             successReturnToOrRedirect: '/'
         }));
-          
-        this.app.get('/callback', (req, res) => {
-            passport.authenticate('oauth2', { failureRedirect: '/login-failure' });
-        }, (req, res) => {
-            res.redirect("/login-success");
-        });
+
+        this.app.get('/callback', passport.authenticate('oauth2', { failureRedirect: '/login-failure' })
+            , (req, res) => {
+                res.redirect("/login-success");
+            });
 
         this.app.get("/", (req, res) => {
             res.send('<h1>Home</h1><p>Please <a href="/register">register or login through eyedeer</a></p>');
