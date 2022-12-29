@@ -1,0 +1,50 @@
+{
+  "name": "eyedeer-demo",
+  "version": "1.0.0",
+  "description": "demo of eyedeer",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc",
+    "compile": "npm run build",
+    "start": "npm run compile && node --require source-map-support/register dist/server/Server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/opencode-mit/eyedeer-demo.git"
+  },
+  "keywords": [
+    "oauth2"
+  ],
+  "author": "open-code",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/opencode-mit/eyedeer-demo/issues"
+  },
+  "homepage": "https://github.com/opencode-mit/eyedeer-demo#readme",
+  "devDependencies": {
+    "@types/connect-mongodb-session": "^2.4.4",
+    "@types/cors": "^2.8.13",
+    "@types/express": "^4.17.15",
+    "@types/express-session": "^1.17.5",
+    "@types/mongoose": "^5.11.97",
+    "@types/node": "^18.11.18",
+    "@types/passport-oauth2": "^1.4.11",
+    "rimraf": "^3.0.2",
+    "source-map-support": "^0.5.21",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "@types/passport": "^1.0.11",
+    "connect-mongodb-session": "^3.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-async-handler": "^1.2.0",
+    "express-session": "^1.17.3",
+    "http-status-codes": "^2.2.0",
+    "mongoose": "^6.8.2",
+    "passport": "^0.6.0",
+    "passport-oauth2": "^1.6.1"
+  }
+}
