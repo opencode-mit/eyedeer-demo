@@ -5,7 +5,8 @@ import OAuth2Strategy from 'passport-oauth2';
 import http from 'http';
 import cors from 'cors';
 import session from 'express-session';
-import { User } from './User';
+const expressMySQLStore = require('express-mysql-session')(session);
+import { User, UserDocument, UserType } from './User';
 import HttpStatus from 'http-status-codes';
 import asyncHandler from 'express-async-handler';
 import connectMongo from 'connect-mongodb-session';
@@ -16,6 +17,7 @@ export class WebServer {
     public server: http.Server | undefined;
 
     public constructor(private readonly port: number) {
+        
         passport.serializeUser(function (user, done) {
             done(null, user);
         });
@@ -24,25 +26,41 @@ export class WebServer {
             done(null, obj);
         });
 
-        passport.use(new OAuth2Strategy({
+        const strategy = new OAuth2Strategy({
             state: true,
-            authorizationURL: 'http://localhost:8080/authorize',
+            authorizationURL: 'http://localhost:8080/dialog/authorize',
             tokenURL: 'http://localhost:8080/token',
-            clientID: "de783c8d0787e52f2f4b",
-            clientSecret: "barish",
+            clientID: "abc123",
+            clientSecret: "ssh-secret",
             callbackURL: "http://localhost:8888/callback",
         }, (accessToken: any, refreshToken: any, profile: any, cb: any) => {
-            return cb(undefined, { email: "adhami@mit.edu", name: "Khaleel Al-Adhami" });
-        }));
+            return cb(undefined, profile);
+        });
 
+        strategy.userProfile = async function(accessToken:string, done: any) {
+            fetch('http://localhost:8080/user?token=' + accessToken).then(data => data.json()).then(data => {
+                done(undefined, data);
+            });
+        }
+
+        passport.use(strategy);
+        
         this.app = express();
+        this.app.set('trust-proxy', 1);
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
+        const store =  new expressMySQLStore({
+            host: 'localhost',
+            port: 3306,
+            user: 'adhami',
+            password: 'donuts',
+            database: 'demo'
+        });
         this.app.use(session({
-            secret: 'r8q,+&1LM3)CD*zAGpx1xm{NeQhc;#',
+            secret: 'donuts',
             resave: false,
             saveUninitialized: true,
-            cookie: { maxAge: 60 * 60 * 1000 } // 1 hour
+            cookie: { maxAge: 60 * 60 * 1000, sameSite: false } // 1 hour
         }));
         this.app.use(passport.initialize());
         this.app.use(passport.session());
@@ -58,7 +76,7 @@ export class WebServer {
             });
 
         this.app.get("/", (req, res) => {
-            res.send('<h1>Home</h1><p>Please <a href="/register">register or login through eyedeer</a></p>');
+            res.send('<h1>Home</h1><p>Please <a href="/login">register or login through eyedeer</a></p>');
         });
 
         const isAuth = (req: Request, res: Response, next: NextFunction) => {
@@ -70,7 +88,9 @@ export class WebServer {
         };
 
         this.app.get('/protected-route', isAuth, (req, res) => {
-            res.send('You made it to the route.');
+            const user = req.user as UserType;
+            assert(user);
+            res.send('Hi, ' + user.name + '! You made it to the route.');
         });
 
         this.app.get('/login-success', (req, res) => {

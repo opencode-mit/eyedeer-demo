@@ -1,10 +1,13 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
 import { ObjectID } from 'bson';
 
-export type UserDocument = mongoose.Document & {
+
+export type UserType = {
     email: string;
     name: string;
-};
+}
+
+export type UserDocument = mongoose.Document & UserType;
 
 const userSchema = new mongoose.Schema<UserDocument>(
     {
