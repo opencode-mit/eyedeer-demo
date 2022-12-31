@@ -40,7 +40,7 @@ export class WebServer {
 
         strategy.userProfile = async function (accessToken: string, done: any) {
             fetch('http://fuiz.mit.edu:8080/user?token=' + accessToken).then(data => data.json()).then(data => {
-                done(undefined, data);
+                done(undefined, data.profile);
             });
         }
 
