@@ -1,0 +1,44 @@
+<style>
+button.oauth {
+    font-family: var(--default-regular-font, -apple-system),BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans",Ubuntu,Cantarell,"Helvetica Neue",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    appearance: none;
+    border: none;
+    display: flex;
+    background-color: white;
+    font-size: 1em;
+    align-items: center;
+    padding: 0.4em;
+    gap: 0.4em;
+    color: #303030;
+    border: 1px solid #bfbfbf;
+    border-radius: 5px;
+    margin: auto;
+    cursor: pointer;
+}
+
+button.oauth:hover {
+    background-color: #f0f0f0;
+    box-shadow: inset 0 0 0 2px #868686, 0 2px 2px 0 rgb(0 0 0 / 8%);
+    border-color: #e3e3e3;
+}
+
+button.oauth:active {
+    background-color: #dbdbdb;
+    box-shadow: inset 0 0 0 1px #5e5e5e, 0 0 0 1px #fff, 0 0 0 3px #428fdc;
+    outline: none;
+    border-color: #e3e3e3;
+}
+
+img.oauth {
+    padding: 0.2em;
+    border-radius: 5px;
+    height: 1.5em;
+}
+</style>
+
+<form action="/login" method="get">
+    <button class="oauth" type="submit">
+        <img class="oauth" alt="eyedeer logo" src="images/eyedeer.svg">
+        Sign in with EyeDeer
+    </button>
+</form>

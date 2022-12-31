@@ -17,7 +17,7 @@ export class WebServer {
     public server: http.Server | undefined;
 
     public constructor(private readonly port: number) {
-        
+
         passport.serializeUser(function (user, done) {
             done(null, user);
         });
@@ -28,8 +28,8 @@ export class WebServer {
 
         const strategy = new OAuth2Strategy({
             state: true,
-            authorizationURL: 'http://localhost:8080/dialog/authorize',
-            tokenURL: 'http://localhost:8080/token',
+            authorizationURL: 'http://fuiz.mit.edu:8080/dialog/authorize',
+            tokenURL: 'http://fuiz.mit.edu:8080/token',
             clientID: "abc123",
             clientSecret: "ssh-secret",
             callbackURL: "http://localhost:8888/callback",
@@ -38,19 +38,20 @@ export class WebServer {
             return cb(undefined, profile);
         });
 
-        strategy.userProfile = async function(accessToken:string, done: any) {
-            fetch('http://localhost:8080/user?token=' + accessToken).then(data => data.json()).then(data => {
+        strategy.userProfile = async function (accessToken: string, done: any) {
+            fetch('http://fuiz.mit.edu:8080/user?token=' + accessToken).then(data => data.json()).then(data => {
                 done(undefined, data);
             });
         }
 
         passport.use(strategy);
-        
+
         this.app = express();
         this.app.set('trust-proxy', 1);
+        this.app.set('view engine', 'ejs');
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
-        const store =  new expressMySQLStore({
+        const store = new expressMySQLStore({
             host: 'localhost',
             port: 3306,
             user: 'adhami',
@@ -66,18 +67,21 @@ export class WebServer {
         this.app.use(passport.initialize());
         this.app.use(passport.session());
 
+        this.app.use(express.static('assets'));
+
         this.app.get('/login', passport.authenticate('oauth2', {
             session: true,
-            successReturnToOrRedirect: '/'
+            successReturnToOrRedirect: '/protected-route',
+            failureRedirect: '/login'
         }));
 
         this.app.get('/callback', passport.authenticate('oauth2', { failureRedirect: '/login-failure' })
             , (req, res) => {
-                res.redirect("/login-success");
+                res.redirect("/protected-route");
             });
 
         this.app.get("/", (req, res) => {
-            res.send('<h1>Home</h1><p>Please <a href="/login">register or login through eyedeer</a></p>');
+            res.render('eyedeer');
         });
 
         const isAuth = (req: Request, res: Response, next: NextFunction) => {
