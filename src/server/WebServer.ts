@@ -61,7 +61,7 @@ export class WebServer {
             secret: 'donuts',
             resave: false,
             saveUninitialized: true,
-            cookie: { maxAge: 60 * 60 * 1000, sameSite: false } // 1 hour
+            cookie: { maxAge: 60 * 60 * 1000 } // 1 hour
         }));
         this.app.use(passport.initialize());
         this.app.use(passport.session());
