@@ -33,6 +33,7 @@ export class WebServer {
             clientID: "abc123",
             clientSecret: "ssh-secret",
             callbackURL: "http://localhost:8888/callback",
+            scope: ["email", "name"]
         }, (accessToken: any, refreshToken: any, profile: any, cb: any) => {
             return cb(undefined, profile);
         });
